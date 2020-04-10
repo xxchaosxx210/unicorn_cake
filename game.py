@@ -24,6 +24,8 @@ ID_UNICORN_TWO = 1002
 
 random.seed(time.time())
 
+# prevents sound lag in game
+pygame.mixer.pre_init(44100, -16, 1, 512)
 pygame.init()
 pygame.mixer.init()
 clock = pygame.time.Clock()
@@ -44,13 +46,13 @@ SOUND_PATH = f".{os.path.sep}sound"
 IMAGE_PATH = f".{os.path.sep}images"
 
 gl_sounds = namedtuple("Sfx", ["cat_meow", "dog_bark", "game_over_voice",
-                               "died", "won", "cake_collect"])(
+                               "died", "won", "gulp"])(
     pygame.mixer.Sound(os.path.join(SOUND_PATH, "cat.ogg")),
     pygame.mixer.Sound(os.path.join(SOUND_PATH, "dog.ogg")),
     pygame.mixer.Sound(os.path.join(SOUND_PATH, "gameover.ogg")),
     None,
     None,
-    None
+    pygame.mixer.Sound(os.path.join(SOUND_PATH, "gulp.ogg"))
 )
 
 
@@ -239,7 +241,7 @@ def game_loop():
     
     cake_counter = CakeScore(0, 32)
     
-    pygame.mixer.music.load(os.path.join(SOUND_PATH, "main.mp3"))
+    pygame.mixer.music.load(os.path.join(SOUND_PATH, "main.ogg"))
     pygame.mixer.music.play(loops=-1) 
     running = True
     while running:
@@ -276,7 +278,7 @@ def game_loop():
         for _cake in sprites["cakes"]:
             if pygame.sprite.collide_rect(unicorn, _cake):
                 # play cake collection sound
-                #gl_sounds.cake_collect.play()
+                gl_sounds.gulp.play()
                 _cake.kill()
                 cake_counter.inc_score()
                 if cake_counter.score == MAX_CAKES:
