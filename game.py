@@ -46,13 +46,14 @@ SOUND_PATH = f".{os.path.sep}sound"
 IMAGE_PATH = f".{os.path.sep}images"
 
 gl_sounds = namedtuple("Sfx", ["cat_meow", "dog_bark", "game_over_voice",
-                               "died", "won", "gulp"])(
+                               "died", "won", "gulp", "powerup"])(
     pygame.mixer.Sound(os.path.join(SOUND_PATH, "cat.ogg")),
     pygame.mixer.Sound(os.path.join(SOUND_PATH, "dog.ogg")),
     pygame.mixer.Sound(os.path.join(SOUND_PATH, "gameover.ogg")),
     None,
     None,
-    pygame.mixer.Sound(os.path.join(SOUND_PATH, "gulp.ogg"))
+    pygame.mixer.Sound(os.path.join(SOUND_PATH, "gulp.ogg")),
+    pygame.mixer.Sound(os.path.join(SOUND_PATH, "powerup.ogg"))
 )
 
 
@@ -119,10 +120,18 @@ class Unicorn(pygame.sprite.Sprite):
             self.rect.move_ip(0, -self.speed)
         if pressed_keys[pygame.K_DOWN]:
             self.rect.move_ip(0, self.speed)
+        if pressed_keys[pygame.K_LEFT]:
+            self.rect.move_ip(-self.speed, 0)
+        if pressed_keys[pygame.K_RIGHT]:
+            self.rect.move_ip(self.speed, 0)
         if self.rect.top < 0:
             self.rect.top = 0
         if self.rect.bottom > SCREEN_HEIGHT:
             self.rect.bottom = SCREEN_HEIGHT
+        if self.rect.left < 0:
+            self.rect.left = 0
+        if self.rect.right > SCREEN_WIDTH:
+            self.rect.right = SCREEN_WIDTH
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -144,6 +153,23 @@ class Enemy(pygame.sprite.Sprite):
         )
         self.speed = random.randint(3, 20)
         
+    def update(self):
+        self.rect.move_ip(-self.speed, 0)
+        if self.rect.right < 0:
+            self.kill()
+
+
+class RainbowPowerup(pygame.sprite.Sprite):
+    
+    def __init__(self):
+        super(RainbowPowerup, self).__init__()
+        self.surf = pygame.image.load(os.path.join(IMAGE_PATH, "rainbow_powerup.png")).convert()
+        self.surf.set_colorkey(TRANSPARENT, pygame.RLEACCEL)
+        self.rect = self.surf.get_rect()
+        self.rect.x = SCREEN_WIDTH + 50
+        self.rect.y = random.randint(0, SCREEN_HEIGHT - self.rect.height)
+        self.speed = 3
+    
     def update(self):
         self.rect.move_ip(-self.speed, 0)
         if self.rect.right < 0:
@@ -235,6 +261,7 @@ def game_loop():
                "clouds": pygame.sprite.Group(),
                "stars": pygame.sprite.Group(),
                "cakes": pygame.sprite.Group(),
+               "rainbow_powerups": pygame.sprite.Group(),
                "all": pygame.sprite.Group()}
     
     sprites["all"].add(unicorn)
@@ -269,6 +296,7 @@ def game_loop():
         sprites["stars"].update(sprites["enemies"])
         sprites["clouds"].update()
         sprites["cakes"].update()
+        sprites["rainbow_powerups"].update()
         screen_buffer.fill(SKY_BLUE)
         screen_buffer.blit(cake_counter.surf, cake_counter.rect)
         for entity in sprites["all"]:
@@ -286,6 +314,15 @@ def game_loop():
                     display_game_results("Congratulations!! You won the Unicorn Cake Challlenge!!!",
                                          gl_sounds.game_over_voice, 4)
                     running = False
+                elif cake_counter.score == 2:
+                    rainbow_powerup = RainbowPowerup()
+                    sprites["rainbow_powerups"].add(rainbow_powerup)
+                    sprites["all"].add(rainbow_powerup)
+        for powerup in sprites["rainbow_powerups"]:
+            if pygame.sprite.collide_rect(unicorn, powerup):
+                gl_sounds.powerup.play()
+                powerup.kill()
+                unicorn.speed += 20
         if pygame.sprite.spritecollideany(unicorn, sprites["enemies"]):
             unicorn.kill()
             display_game_results("You Lose!! :(", gl_sounds.game_over_voice, 4)
