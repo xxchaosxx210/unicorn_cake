@@ -78,8 +78,8 @@ class RainbowStar(pygame.sprite.Sprite):
     
     def __init__(self, _entity):
         super(RainbowStar, self).__init__()
-        self.surf = pygame.image.load(os.path.join(IMAGE_PATH, "stars.jpg")).convert()
-        self.surf.set_colorkey(WHITE, pygame.RLEACCEL)
+        self.surf = pygame.image.load(os.path.join(IMAGE_PATH, "star.png")).convert()
+        self.surf.set_colorkey(TRANSPARENT, pygame.RLEACCEL)
         self.rect = self.surf.get_rect(
             left = _entity.rect.right,
             top = _entity.rect.top + 10
@@ -152,11 +152,25 @@ class Enemy(pygame.sprite.Sprite):
             bottom = start_y
         )
         self.speed = random.randint(3, 20)
+        if random.randint(0, 1) == 1:
+            self.is_moving_down = True
+        else:
+            self.is_moving_down = False
         
     def update(self):
-        self.rect.move_ip(-self.speed, 0)
+        if self.rect.top < 0:
+            self.rect.top = 0
+            self.is_moving_down = True
+        if self.rect.bottom > SCREEN_HEIGHT:
+            self.rect.bottom = SCREEN_HEIGHT
+            self.is_moving_down = False
+        
+        if self.is_moving_down:
+            self.rect.move_ip(-self.speed, +self.speed)
+        else:
+            self.rect.move_ip(-self.speed, -self.speed)
         if self.rect.right < 0:
-            self.kill()
+            self.kill()        
 
 
 class RainbowPowerup(pygame.sprite.Sprite):
@@ -180,7 +194,7 @@ class UnicornCake(pygame.sprite.Sprite):
     
     def __init__(self):
         super(UnicornCake, self).__init__()
-        self.surf = pygame.image.load(os.path.join(IMAGE_PATH, "unicorn_cake.jpg")).convert()
+        self.surf = pygame.image.load(os.path.join(IMAGE_PATH, "unicorn_cake.png")).convert()
         self.surf.set_colorkey(TRANSPARENT, pygame.RLEACCEL)
         self.rect = self.surf.get_rect()
         self.rect.center = (SCREEN_WIDTH + 20, random.randint(0, SCREEN_HEIGHT))
@@ -200,6 +214,8 @@ class UnicornCake(pygame.sprite.Sprite):
             self.rect.move_ip(-self.speed, +self.speed)
         else:
             self.rect.move_ip(-self.speed, -self.speed)
+        if self.rect.right < 0:
+            self.kill()        
             
 
 class Text:
@@ -323,10 +339,13 @@ def game_loop():
                 gl_sounds.powerup.play()
                 powerup.kill()
                 unicorn.speed += 20
-        if pygame.sprite.spritecollideany(unicorn, sprites["enemies"]):
-            unicorn.kill()
-            display_game_results("You Lose!! :(", gl_sounds.game_over_voice, 4)
-            running = False
+        for enemy in sprites["enemies"]:
+            if pygame.sprite.collide_rect(unicorn, enemy):
+                unicorn.kill()
+                enemy.kill()
+                display_game_results("You Lose!! :(", gl_sounds.game_over_voice, 4)
+                running = False            
+            
         clock.tick(FRAME_RATE)
 
     unicorn.kill()
