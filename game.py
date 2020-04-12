@@ -16,13 +16,14 @@ pygame.mixer.init()
 import sprites
 import graphics
 import sfx
+import text
 from graphics import SCREEN_WIDTH
 from graphics import SCREEN_HEIGHT
 
 clock = pygame.time.Clock()
 
 screen_buffer = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Unicorn Princess by Ivy Snow Leeder(c) 2020")
+pygame.display.set_caption("Unicorn Cake Game(c) 2020")
 
 ADD_ENEMY = pygame.USEREVENT + 1
 pygame.time.set_timer(ADD_ENEMY, 800)
@@ -32,29 +33,9 @@ pygame.time.set_timer(ADD_CLOUD, 1000)
 
 ADD_CAKE = pygame.USEREVENT + 3
 pygame.time.set_timer(ADD_CAKE, 5000)
-
-
-class Text:
-    
-    def __init__(self, message, size):
-        self.size = size
-        self.font = pygame.font.Font("unicorn.ttf", size)
-        self.set_text(message)
-    
-    def set_text(self, text):
-        self.text = text
-        self.surf = self.font.render(text, True, graphics.FONT_COLOUR, None)
-        self.rect = self.surf.get_rect()
-    
-    def set_position(self, x, y):
-        self.rect.x = x
-        self.rect.y = y
-    
-    def center(self):
-        self.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
         
 
-class CakeScore(Text):
+class CakeScore(text.Text):
     
     def __init__(self, score, size):
         super(CakeScore, self).__init__(f"Cakes: {score}", size)
@@ -76,13 +57,13 @@ class CakeScore(Text):
         self.set_xy()  
         
 
-def display_game_results(text, results_sound, timeout):
+def display_game_results(message, results_sound, timeout):
     pygame.mixer.music.stop()
-    text = Text(text, 42)
-    text.center()
+    _text = text.Text(message, 42)
+    _text.center()
     screen_buffer.fill(graphics.SKY_BLUE)
     results_sound.play()
-    screen_buffer.blit(text.surf, text.rect)
+    screen_buffer.blit(_text.surf, _text.rect)
     pygame.display.update()
     time.sleep(timeout)
         
