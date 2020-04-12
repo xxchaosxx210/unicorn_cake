@@ -2,25 +2,8 @@ import pygame
 import random
 import time
 import os
-from collections import namedtuple
 
 MAX_CAKES = 4
-
-CAT = 0
-DOG = 1
-
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
-
-FRAME_RATE = 30
-
-WHITE = (255, 255, 255)
-FONT_COLOUR = (255, 0, 220)
-SKY_BLUE = (150, 150, 255)
-TRANSPARENT = (127, 255, 255)
-
-ID_UNICORN_ONE = 1001
-ID_UNICORN_TWO = 1002
 
 random.seed(time.time())
 
@@ -28,6 +11,14 @@ random.seed(time.time())
 pygame.mixer.pre_init(44100, -16, 1, 512)
 pygame.init()
 pygame.mixer.init()
+
+# init pygame first before importing files
+import sprites
+import graphics
+import sfx
+from graphics import SCREEN_WIDTH
+from graphics import SCREEN_HEIGHT
+
 clock = pygame.time.Clock()
 
 screen_buffer = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -42,180 +33,6 @@ pygame.time.set_timer(ADD_CLOUD, 1000)
 ADD_CAKE = pygame.USEREVENT + 3
 pygame.time.set_timer(ADD_CAKE, 5000)
 
-SOUND_PATH = f".{os.path.sep}sound"
-IMAGE_PATH = f".{os.path.sep}images"
-
-gl_sounds = namedtuple("Sfx", ["cat_meow", "dog_bark", "game_over_voice",
-                               "died", "won", "gulp", "powerup"])(
-    pygame.mixer.Sound(os.path.join(SOUND_PATH, "cat.ogg")),
-    pygame.mixer.Sound(os.path.join(SOUND_PATH, "dog.ogg")),
-    pygame.mixer.Sound(os.path.join(SOUND_PATH, "gameover.ogg")),
-    None,
-    None,
-    pygame.mixer.Sound(os.path.join(SOUND_PATH, "gulp.ogg")),
-    pygame.mixer.Sound(os.path.join(SOUND_PATH, "powerup.ogg"))
-)
-
-class Cloud(pygame.sprite.Sprite):
-    
-    def __init__(self):
-        super(Cloud, self).__init__()
-        self.surf = pygame.image.load(os.path.join(IMAGE_PATH, "cloud.png")).convert()
-        self.surf.set_colorkey(TRANSPARENT, pygame.RLEACCEL)
-        self.rect = self.surf.get_rect(
-            center = (random.randint(SCREEN_WIDTH + 20, SCREEN_WIDTH + 100), 
-                      random.randint(0, SCREEN_HEIGHT))
-        )
-        self.speed = 5
-    
-    def update(self):
-        self.rect.move_ip(-self.speed, 0)
-        if self.rect.right < 0:
-            self.kill()
-
-class RainbowStar(pygame.sprite.Sprite):
-    
-    def __init__(self, _entity):
-        super(RainbowStar, self).__init__()
-        self.surf = pygame.image.load(os.path.join(IMAGE_PATH, "star.png")).convert()
-        self.surf.set_colorkey(TRANSPARENT, pygame.RLEACCEL)
-        self.rect = self.surf.get_rect(
-            left = _entity.rect.right,
-            top = _entity.rect.top + 10
-        )
-        self.speed = 10
-    
-    def update(self, _enemies):
-        self.rect.move_ip(self.speed, 0)
-        for _enemy in _enemies:
-            if pygame.sprite.collide_rect(self, _enemy):
-                if _enemy.type == "cat":
-                    gl_sounds.cat_meow.play()
-                else:
-                    gl_sounds.dog_bark.play()
-                self.kill()
-                _enemy.kill()
-        if self.rect.left > SCREEN_WIDTH:
-            self.kill()
-
-class Unicorn(pygame.sprite.Sprite):
-    
-    def __init__(self, _type):
-        super(Unicorn, self).__init__()
-        if _type == ID_UNICORN_ONE:
-            self.surf = pygame.image.load(os.path.join(IMAGE_PATH, "unicorn.png")).convert()
-        elif _type == ID_UNICORN_TWO:
-            self.surf = pygame.image.load(os.path.join(IMAGE_PATH, "unicorn2.png")).convert()
-        self.surf.set_colorkey(TRANSPARENT, pygame.RLEACCEL)
-        self.rect = self.surf.get_rect(
-            top = 0,
-            left = 0
-        )
-        self.speed = 10
-        self.cakes = 0
-    
-    def update(self, pressed_keys):
-        if pressed_keys[pygame.K_UP]:
-            self.rect.move_ip(0, -self.speed)
-        if pressed_keys[pygame.K_DOWN]:
-            self.rect.move_ip(0, self.speed)
-        if pressed_keys[pygame.K_LEFT]:
-            self.rect.move_ip(-self.speed, 0)
-        if pressed_keys[pygame.K_RIGHT]:
-            self.rect.move_ip(self.speed, 0)
-        if self.rect.top < 0:
-            self.rect.top = 0
-        if self.rect.bottom > SCREEN_HEIGHT:
-            self.rect.bottom = SCREEN_HEIGHT
-        if self.rect.left < 0:
-            self.rect.left = 0
-        if self.rect.right > SCREEN_WIDTH:
-            self.rect.right = SCREEN_WIDTH
-
-
-class Enemy(pygame.sprite.Sprite):
-    
-    def __init__(self):
-        super(Enemy, self).__init__()
-        if random.randint(0, 1) == CAT:
-            self.surf = pygame.image.load(os.path.join(IMAGE_PATH, "cat.png")).convert()
-            self.type = "cat"
-        else:
-            self.surf = pygame.image.load(os.path.join(IMAGE_PATH, "dog.png")).convert()
-            self.type = "dog"
-        self.surf.set_colorkey(TRANSPARENT, pygame.RLEACCEL)
-        start_x = SCREEN_WIDTH + 100
-        start_y = random.randint(0, SCREEN_HEIGHT)
-        self.rect = self.surf.get_rect(
-            right = start_x,
-            bottom = start_y
-        )
-        self.speed = random.randint(3, 20)
-        if random.randint(0, 1) == 1:
-            self.is_moving_down = True
-        else:
-            self.is_moving_down = False
-        
-    def update(self):
-        if self.rect.top < 0:
-            self.rect.top = 0
-            self.is_moving_down = True
-        if self.rect.bottom > SCREEN_HEIGHT:
-            self.rect.bottom = SCREEN_HEIGHT
-            self.is_moving_down = False
-        
-        if self.is_moving_down:
-            self.rect.move_ip(-self.speed, +self.speed)
-        else:
-            self.rect.move_ip(-self.speed, -self.speed)
-        if self.rect.right < 0:
-            self.kill()        
-
-
-class RainbowPowerup(pygame.sprite.Sprite):
-    
-    def __init__(self):
-        super(RainbowPowerup, self).__init__()
-        self.surf = pygame.image.load(os.path.join(IMAGE_PATH, "rainbow_powerup.png")).convert()
-        self.surf.set_colorkey(TRANSPARENT, pygame.RLEACCEL)
-        self.rect = self.surf.get_rect()
-        self.rect.x = SCREEN_WIDTH + 50
-        self.rect.y = random.randint(0, SCREEN_HEIGHT - self.rect.height)
-        self.speed = 3
-    
-    def update(self):
-        self.rect.move_ip(-self.speed, 0)
-        if self.rect.right < 0:
-            self.kill()
-
-
-class UnicornCake(pygame.sprite.Sprite):
-    
-    def __init__(self):
-        super(UnicornCake, self).__init__()
-        self.surf = pygame.image.load(os.path.join(IMAGE_PATH, "unicorn_cake.png")).convert()
-        self.surf.set_colorkey(TRANSPARENT, pygame.RLEACCEL)
-        self.rect = self.surf.get_rect()
-        self.rect.center = (SCREEN_WIDTH + 20, random.randint(0, SCREEN_HEIGHT))
-        
-        self.is_moving_down = True
-        self.speed = random.randint(12, 25)
-    
-    def update(self):        
-        if self.rect.top < 0:
-            self.rect.top = 0
-            self.is_moving_down = True
-        if self.rect.bottom > SCREEN_HEIGHT:
-            self.rect.bottom = SCREEN_HEIGHT
-            self.is_moving_down = False
-        
-        if self.is_moving_down:
-            self.rect.move_ip(-self.speed, +self.speed)
-        else:
-            self.rect.move_ip(-self.speed, -self.speed)
-        if self.rect.right < 0:
-            self.kill()        
-            
 
 class Text:
     
@@ -226,7 +43,7 @@ class Text:
     
     def set_text(self, text):
         self.text = text
-        self.surf = self.font.render(text, True, FONT_COLOUR, None)
+        self.surf = self.font.render(text, True, graphics.FONT_COLOUR, None)
         self.rect = self.surf.get_rect()
     
     def set_position(self, x, y):
@@ -263,103 +80,103 @@ def display_game_results(text, results_sound, timeout):
     pygame.mixer.music.stop()
     text = Text(text, 42)
     text.center()
-    screen_buffer.fill(SKY_BLUE)
+    screen_buffer.fill(graphics.SKY_BLUE)
     results_sound.play()
     screen_buffer.blit(text.surf, text.rect)
     pygame.display.update()
     time.sleep(timeout)
         
 def game_loop():    
-    unicorn = Unicorn(ID_UNICORN_ONE)
+    unicorn = sprites.Unicorn()
     
-    sprites = {"enemies": pygame.sprite.Group(),
+    entities = {"enemies": pygame.sprite.Group(),
                "clouds": pygame.sprite.Group(),
                "stars": pygame.sprite.Group(),
                "cakes": pygame.sprite.Group(),
                "rainbow_powerups": pygame.sprite.Group(),
                "all": pygame.sprite.Group()}
     
-    sprites["all"].add(unicorn)
+    entities["all"].add(unicorn)
     
     cake_counter = CakeScore(0, 32)
     
-    pygame.mixer.music.load(os.path.join(SOUND_PATH, "main.ogg"))
+    pygame.mixer.music.load(os.path.join(sfx.SOUND_PATH, "main.ogg"))
     pygame.mixer.music.play(loops=-1) 
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    rainbow_star = RainbowStar(unicorn)
-                    sprites["all"].add(rainbow_star)
-                    sprites["stars"].add(rainbow_star)
+                    rainbow_star = sprites.RainbowStar(unicorn)
+                    entities["all"].add(rainbow_star)
+                    entities["stars"].add(rainbow_star)
             if event.type == ADD_ENEMY:
-                enemy = Enemy()
-                sprites["enemies"].add(enemy)
-                sprites["all"].add(enemy)
+                enemy = sprites.Enemy()
+                entities["enemies"].add(enemy)
+                entities["all"].add(enemy)
             if event.type == ADD_CLOUD:
-                cloud = Cloud()
-                sprites["clouds"].add(cloud)
-                sprites["all"].add(cloud)
+                cloud = sprites.Cloud()
+                entities["clouds"].add(cloud)
+                entities["all"].add(cloud)
             if event.type == ADD_CAKE:
-                cake = UnicornCake()
-                sprites["cakes"].add(cake)
-                sprites["all"].add(cake)
+                cake = sprites.UnicornCake()
+                entities["cakes"].add(cake)
+                entities["all"].add(cake)
                 
         unicorn.update(pygame.key.get_pressed())         
-        sprites["enemies"].update()
-        sprites["stars"].update(sprites["enemies"])
-        sprites["clouds"].update()
-        sprites["cakes"].update()
-        sprites["rainbow_powerups"].update()
-        screen_buffer.fill(SKY_BLUE)
+        entities["enemies"].update()
+        entities["stars"].update(entities["enemies"])
+        entities["clouds"].update()
+        entities["cakes"].update()
+        entities["rainbow_powerups"].update()
+        screen_buffer.fill(graphics.SKY_BLUE)
         screen_buffer.blit(cake_counter.surf, cake_counter.rect)
-        for entity in sprites["all"]:
+        for entity in entities["all"]:
             screen_buffer.blit(entity.surf, entity.rect)
         # update the score
         pygame.display.update()
-        for _cake in sprites["cakes"]:
+        for _cake in entities["cakes"]:
             if pygame.sprite.collide_rect(unicorn, _cake):
                 # play cake collection sound
-                gl_sounds.gulp.play()
+                sfx.gulp.play()
                 _cake.kill()
                 cake_counter.inc_score()
                 if cake_counter.score == MAX_CAKES:
                     # we won the challlenge!!
                     display_game_results("Congratulations!! You won the Unicorn Cake Challlenge!!!",
-                                         gl_sounds.game_over_voice, 4)
+                                         sfx.game_over_voice, 4)
                     running = False
                 elif cake_counter.score == 2:
-                    rainbow_powerup = RainbowPowerup()
-                    sprites["rainbow_powerups"].add(rainbow_powerup)
-                    sprites["all"].add(rainbow_powerup)
-        for powerup in sprites["rainbow_powerups"]:
+                    rainbow_powerup = sprites.RainbowPowerup()
+                    entities["rainbow_powerups"].add(rainbow_powerup)
+                    entities["all"].add(rainbow_powerup)
+        for powerup in entities["rainbow_powerups"]:
             if pygame.sprite.collide_rect(unicorn, powerup):
-                gl_sounds.powerup.play()
+                sfx.powerup.play()
                 powerup.kill()
                 unicorn.speed += 20
-        for enemy in sprites["enemies"]:
+        for enemy in entities["enemies"]:
             if pygame.sprite.collide_rect(unicorn, enemy):
                 unicorn.kill()
                 enemy.kill()
-                display_game_results("You Lose!! :(", gl_sounds.game_over_voice, 4)
+                display_game_results("You Lose!! :(", sfx.game_over_voice, 4)
                 running = False            
-        clock.tick(FRAME_RATE)
+        clock.tick(graphics.FRAME_RATE)
 
     unicorn.kill()
-    sprites["all"].empty()
-    del sprites["all"]
-    del sprites["clouds"]
-    del sprites["stars"]
-    del sprites["enemies"]
-    del sprites["cakes"]
+    entities["all"].empty()
+    del entities["all"]
+    del entities["clouds"]
+    del entities["stars"]
+    del entities["enemies"]
+    del entities["cakes"]
     del cake_counter
     del unicorn
     pygame.mixer.music.stop()
     
 def get_text(message, font_size):
     font = pygame.font.Font("unicorn.ttf", font_size)
-    text = font.render(message, True, FONT_COLOUR, None)
+    text = font.render(message, True, graphics.FONT_COLOUR, None)
     return text
 
 def unicorn_selection_menu():
@@ -369,17 +186,17 @@ def unicorn_selection_menu():
     while running:
         for event in pygame.event.get():
             if event.type == ADD_CLOUD:
-                cloud = Cloud()
+                cloud = sprites.Cloud()
                 all_sprites.add(cloud)
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_ESCAPE:
                     running = False
-        screen_buffer.fill(SKY_BLUE)
+        screen_buffer.fill(graphics.SKY_BLUE)
         all_sprites.update()
         for entity in all_sprites:
             screen_buffer.blit(entity.surf, entity.rect)
         pygame.display.update()
-        clock.tick(FRAME_RATE)
+        clock.tick(graphics.FRAME_RATE)
     all_sprites.empty()
     unicorns.empty()
     del all_sprites
@@ -409,7 +226,7 @@ def main():
     clouds = pygame.sprite.Group()
     all_sprites = pygame.sprite.Group()
     
-    pygame.mixer.music.load(os.path.join(SOUND_PATH, "menu.mp3"))
+    pygame.mixer.music.load(os.path.join(sfx.SOUND_PATH, "menu.mp3"))
     pygame.mixer.music.play(loops=-1)
     
     while running:
@@ -420,18 +237,18 @@ def main():
                 if event.key == pygame.K_RETURN:
                     pygame.mixer.music.stop()
                     game_loop()
-                    pygame.mixer.music.load(os.path.join(SOUND_PATH, "menu.mp3"))
+                    pygame.mixer.music.load(os.path.join(sfx.SOUND_PATH, "menu.mp3"))
                     pygame.mixer.music.play(loops=-1)
                 if event.key == pygame.K_1:
                     unicorn_selection_menu()
             if event.type == ADD_CLOUD:
-                cloud = Cloud()
+                cloud = sprites.Cloud()
                 clouds.add(cloud)
                 all_sprites.add(cloud)
                 
         clouds.update()
         
-        screen_buffer.fill(SKY_BLUE)
+        screen_buffer.fill(graphics.SKY_BLUE)
         for entity in all_sprites:
             screen_buffer.blit(entity.surf, entity.rect)
         screen_buffer.blit(title_text, title_rect)
@@ -439,7 +256,7 @@ def main():
         screen_buffer.blit(header3_text, header3_rect)
         screen_buffer.blit(header4_text, header4_rect)
         pygame.display.update()
-        clock.tick(FRAME_RATE)
+        clock.tick(graphics.FRAME_RATE)
     
 main()
 pygame.quit()
