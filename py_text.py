@@ -1,6 +1,11 @@
 import pygame
 import graphics
 
+def get_text(message, font_size):
+    font = pygame.font.Font("unicorn.ttf", font_size)
+    text = font.render(message, True, graphics.FONT_COLOUR, None)
+    return text
+
 class Text:
     
     def __init__(self, message, size):

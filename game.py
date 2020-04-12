@@ -16,7 +16,7 @@ pygame.mixer.init()
 import sprites
 import graphics
 import sfx
-import text
+import py_text
 from graphics import SCREEN_WIDTH
 from graphics import SCREEN_HEIGHT
 
@@ -35,7 +35,7 @@ ADD_CAKE = pygame.USEREVENT + 3
 pygame.time.set_timer(ADD_CAKE, 5000)
         
 
-class CakeScore(text.Text):
+class CakeScore(py_text.Text):
     
     def __init__(self, score, size):
         super(CakeScore, self).__init__(f"Cakes: {score}", size)
@@ -59,11 +59,11 @@ class CakeScore(text.Text):
 
 def display_game_results(message, results_sound, timeout):
     pygame.mixer.music.stop()
-    _text = text.Text(message, 42)
-    _text.center()
+    text = py_text.Text(message, 42)
+    text.center()
     screen_buffer.fill(graphics.SKY_BLUE)
     results_sound.play()
-    screen_buffer.blit(_text.surf, _text.rect)
+    screen_buffer.blit(text.surf, text.rect)
     pygame.display.update()
     time.sleep(timeout)
         
@@ -154,11 +154,7 @@ def game_loop():
     del cake_counter
     del unicorn
     pygame.mixer.music.stop()
-    
-def get_text(message, font_size):
-    font = pygame.font.Font("unicorn.ttf", font_size)
-    text = font.render(message, True, graphics.FONT_COLOUR, None)
-    return text
+
 
 def unicorn_selection_menu():
     running = True
@@ -185,13 +181,13 @@ def unicorn_selection_menu():
 def main():
     running = True
     
-    title_text = get_text("Unicorn Cake Game(c)", 64)
+    title_text = py_text.get_text("Unicorn Cake Game(c)", 64)
     title_rect = title_text.get_rect()
     title_rect.center = (SCREEN_WIDTH // 2, (SCREEN_HEIGHT // 2) - title_rect.height)
     
-    header2_text = get_text("Coded by Paul Millar", 43)
-    header3_text = get_text("Designed by Ivy Snow Leeder", 43)
-    header4_text = get_text("Press 'Return' key to Play.", 32)
+    header2_text = py_text.get_text("Coded by Paul Millar", 43)
+    header3_text = py_text.get_text("Designed by Ivy Snow Leeder", 43)
+    header4_text = py_text.get_text("Press 'Return' key to Play.", 32)
     
     header2_rect = header2_text.get_rect()
     header2_rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
