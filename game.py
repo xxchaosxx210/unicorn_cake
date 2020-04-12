@@ -32,30 +32,7 @@ ADD_CLOUD = pygame.USEREVENT + 2
 pygame.time.set_timer(ADD_CLOUD, 1000)
 
 ADD_CAKE = pygame.USEREVENT + 3
-pygame.time.set_timer(ADD_CAKE, 5000)
-        
-
-class CakeScore(py_text.Text):
-    
-    def __init__(self, score, size):
-        super(CakeScore, self).__init__(f"Cakes: {score}", size)
-        self.score = score
-        self.set_xy()
-    
-    def set_xy(self):
-        self.rect.x = SCREEN_WIDTH - self.rect.width - 20
-        self.rect.y = 10
-    
-    def inc_score(self):
-        self.score += 1
-        self.set_text(f"Cakes: {self.score}")
-        self.set_xy()
-    
-    def reset_score(self):
-        self.score = 0
-        self.set_text(f"Cakes: {self.score}")
-        self.set_xy()  
-        
+pygame.time.set_timer(ADD_CAKE, 5000) 
 
 def display_game_results(message, results_sound, timeout):
     pygame.mixer.music.stop()
@@ -68,21 +45,24 @@ def display_game_results(message, results_sound, timeout):
     time.sleep(timeout)
         
 def game_loop():    
+    # create a new unicorn player object
     unicorn = sprites.Unicorn()
     
+    # Init sprite groups
     entities = {"enemies": pygame.sprite.Group(),
                "clouds": pygame.sprite.Group(),
                "stars": pygame.sprite.Group(),
                "cakes": pygame.sprite.Group(),
                "rainbow_powerups": pygame.sprite.Group(),
                "all": pygame.sprite.Group()}
-    
     entities["all"].add(unicorn)
     
-    cake_counter = CakeScore(0, 32)
+    # setup the unicorn cake score
+    cake_counter = sprites.CakeScore(0, 32)
     
     pygame.mixer.music.load(os.path.join(sfx.SOUND_PATH, "main.ogg"))
     pygame.mixer.music.play(loops=-1) 
+    
     running = True
     while running:
         for event in pygame.event.get():
@@ -92,30 +72,38 @@ def game_loop():
                     entities["all"].add(rainbow_star)
                     entities["stars"].add(rainbow_star)
             if event.type == ADD_ENEMY:
+                # SPAWN A NEW ENEMY
                 enemy = sprites.Enemy()
                 entities["enemies"].add(enemy)
                 entities["all"].add(enemy)
             if event.type == ADD_CLOUD:
+                # ADD A NEW CLOUD
                 cloud = sprites.Cloud()
                 entities["clouds"].add(cloud)
                 entities["all"].add(cloud)
             if event.type == ADD_CAKE:
+                # SPAWN A UNICORN CAKE
                 cake = sprites.UnicornCake()
                 entities["cakes"].add(cake)
                 entities["all"].add(cake)
-                
+        
+        # PROCESS EVENTS CHANGE SPRITE POSITIONS
         unicorn.update(pygame.key.get_pressed())         
         entities["enemies"].update()
         entities["stars"].update(entities["enemies"])
         entities["clouds"].update()
         entities["cakes"].update()
         entities["rainbow_powerups"].update()
+        
+        # DRAW TO BUFFER AND THEN TO SCREEN
         screen_buffer.fill(graphics.SKY_BLUE)
         screen_buffer.blit(cake_counter.surf, cake_counter.rect)
         for entity in entities["all"]:
             screen_buffer.blit(entity.surf, entity.rect)
         # update the score
         pygame.display.update()
+        
+        # CHECK FOR COLLISIONS
         for _cake in entities["cakes"]:
             if pygame.sprite.collide_rect(unicorn, _cake):
                 # play cake collection sound
@@ -144,6 +132,7 @@ def game_loop():
                 running = False            
         clock.tick(graphics.FRAME_RATE)
 
+    # CLEAN UP
     unicorn.kill()
     entities["all"].empty()
     del entities["all"]

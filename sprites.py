@@ -3,6 +3,7 @@ import os
 import random
 
 import graphics
+import py_text
 from graphics import SCREEN_WIDTH, SCREEN_HEIGHT
 import sfx
 
@@ -10,6 +11,29 @@ CAT = 0
 DOG = 1
 
 IMAGE_PATH = f".{os.path.sep}images" 
+
+
+class CakeScore(py_text.Text):
+    
+    def __init__(self, score, size):
+        super(CakeScore, self).__init__(f"Cakes: {score}", size)
+        self.score = score
+        self.set_xy()
+    
+    def set_xy(self):
+        self.rect.x = SCREEN_WIDTH - self.rect.width - 20
+        self.rect.y = 10
+    
+    def inc_score(self):
+        self.score += 1
+        self.set_text(f"Cakes: {self.score}")
+        self.set_xy()
+    
+    def reset_score(self):
+        self.score = 0
+        self.set_text(f"Cakes: {self.score}")
+        self.set_xy() 
+        
 
 class Cloud(pygame.sprite.Sprite):
     
