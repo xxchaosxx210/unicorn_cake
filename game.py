@@ -56,7 +56,6 @@ gl_sounds = namedtuple("Sfx", ["cat_meow", "dog_bark", "game_over_voice",
     pygame.mixer.Sound(os.path.join(SOUND_PATH, "powerup.ogg"))
 )
 
-
 class Cloud(pygame.sprite.Sprite):
     
     def __init__(self):
@@ -345,7 +344,6 @@ def game_loop():
                 enemy.kill()
                 display_game_results("You Lose!! :(", gl_sounds.game_over_voice, 4)
                 running = False            
-            
         clock.tick(FRAME_RATE)
 
     unicorn.kill()
