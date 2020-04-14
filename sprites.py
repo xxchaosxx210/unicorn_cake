@@ -141,7 +141,7 @@ class Unicorn(pygame.sprite.Sprite):
             self.frame_count = 0
         else:
             self.frame_count += 1
-            
+
             
 class Enemy(pygame.sprite.Sprite):
     
