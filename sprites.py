@@ -90,15 +90,10 @@ class AnimatedSprite(pygame.sprite.Sprite):
     def __init__(self, 
                  sheet_path,  
                  frame_change,
-                 sprite_count, 
-                 start_x, 
-                 start_y, 
-                 sprite_width, 
-                 sprite_height):
+                 rects):
         super(AnimatedSprite, self).__init__()
-        rects = load_rects(10, 20, 64, 94, 68)
         sheet = SpriteSheet(sheet_path)
-        self.surfs = sheet.images_at(rects, graphics.TRANSPARENT)
+        self.surfs = sheet.images_at(rects)
         self.walk_count = 0
         self.frame_change = frame_change
         self.frame_count = 0
@@ -179,9 +174,14 @@ class Unicorn(pygame.sprite.Sprite):
 
 class Dog(AnimatedSprite):
     def __init__(self):
-        super(Dog, self).__init__(os.path.join(IMAGE_PATH, "dog_sprite_sheet.png"),
-                                  3, 10, 20, 64, 94, 68)
-        self.speed = random.randint(1, 2)
+        path = os.path.join(IMAGE_PATH, "dog_sprite_sheet.png")
+        rects = ((20, 64, 94, 68), (109, 64, 94, 68),
+                 (212, 64, 94, 68), (306, 64, 94, 68),
+                 (404, 64, 94, 68), (490, 64, 94, 68),
+                 (582, 64, 94, 68), (681, 64, 94, 68),
+                 (778, 64, 94, 68), (874, 64, 94, 68))
+        super(Dog, self).__init__(path, 3, rects)
+        self.speed = random.randint(5, 10)
         start_x = SCREEN_WIDTH + 100
         start_y = random.randint(0, SCREEN_HEIGHT)
         self.rect = self.surfs[0].get_rect(
