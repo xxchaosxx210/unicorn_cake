@@ -1,6 +1,13 @@
 import pygame
 
 
+def load_rects(sprite_count, x, y, width, height):
+    rects = []
+    for sprite_index in range(sprite_count):
+        rects.append((x, y, width, height))
+        x += width
+    return rects
+
 class SpriteSheet:
     
     def __init__(self, filename):

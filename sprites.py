@@ -8,6 +8,7 @@ import py_text
 from graphics import SCREEN_WIDTH, SCREEN_HEIGHT
 import sfx
 from spritesheet import SpriteSheet
+from spritesheet import load_rects
 
 CAT = 0
 DOG = 1
@@ -74,10 +75,7 @@ class RainbowStar(pygame.sprite.Sprite):
         self.rect.move_ip(self.speed, 0)
         for _enemy in _enemies:
             if pygame.sprite.collide_rect(self, _enemy):
-                if _enemy.type == "cat":
-                    sfx.cat_meow.play()
-                else:
-                    sfx.dog_bark.play()
+                sfx.dog_bark.play()
                 self.kill()
                 _enemy.kill()
         if self.rect.left > SCREEN_WIDTH:
@@ -85,6 +83,42 @@ class RainbowStar(pygame.sprite.Sprite):
     
     def draw(self, screenbuffer):
         screenbuffer.blit(self.surf, self.rect)    
+        
+
+class AnimatedSprite(pygame.sprite.Sprite):
+    
+    def __init__(self, 
+                 sheet_path,  
+                 frame_change,
+                 sprite_count, 
+                 start_x, 
+                 start_y, 
+                 sprite_width, 
+                 sprite_height):
+        super(AnimatedSprite, self).__init__()
+        rects = load_rects(10, 20, 64, 94, 68)
+        sheet = SpriteSheet(sheet_path)
+        self.surfs = sheet.images_at(rects, graphics.TRANSPARENT)
+        self.walk_count = 0
+        self.frame_change = frame_change
+        self.frame_count = 0
+    
+    def draw(self, screen_buffer):
+        surf = self.surfs[self.walk_count]
+        x = self.rect.x
+        y = self.rect.y
+        self.rect = surf.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        screen_buffer.blit(surf, self.rect)
+        if self.frame_count > self.frame_change:
+            if self.walk_count == len(self.surfs)-1:
+                self.walk_count = 0
+            else:
+                self.walk_count += 1
+            self.frame_count = 0
+        else:
+            self.frame_count += 1
             
             
 class Unicorn(pygame.sprite.Sprite):   
@@ -141,18 +175,45 @@ class Unicorn(pygame.sprite.Sprite):
             self.frame_count = 0
         else:
             self.frame_count += 1
+                 
 
+class Dog(AnimatedSprite):
+    def __init__(self):
+        super(Dog, self).__init__(os.path.join(IMAGE_PATH, "dog_sprite_sheet.png"),
+                                  3, 10, 20, 64, 94, 68)
+        self.speed = random.randint(1, 2)
+        start_x = SCREEN_WIDTH + 100
+        start_y = random.randint(0, SCREEN_HEIGHT)
+        self.rect = self.surfs[0].get_rect(
+            x = start_x,
+            y = start_y
+        )
+        if random.randint(0, 1) == 1:
+            self.is_moving_down = True
+        else:
+            self.is_moving_down = False
+            
+    def update(self):
+        if self.rect.top < 0:
+            self.rect.top = 0
+            self.is_moving_down = True
+        if self.rect.bottom > SCREEN_HEIGHT:
+            self.rect.bottom = SCREEN_HEIGHT
+            self.is_moving_down = False
+        
+        if self.is_moving_down:
+            self.rect.move_ip(-self.speed, +self.speed)
+        else:
+            self.rect.move_ip(-self.speed, -self.speed)
+        if self.rect.right < 0:
+            self.kill()    
+        
             
 class Enemy(pygame.sprite.Sprite):
     
     def __init__(self):
         super(Enemy, self).__init__()
-        if random.randint(0, 1) == CAT:
-            self.surf = pygame.image.load(os.path.join(IMAGE_PATH, "cat.png")).convert()
-            self.type = "cat"
-        else:
-            self.surf = pygame.image.load(os.path.join(IMAGE_PATH, "dog.png")).convert()
-            self.type = "dog"
+        self.surf = pygame.image.load(os.path.join(IMAGE_PATH, "cat.png")).convert()
         self.surf.set_colorkey(graphics.TRANSPARENT, pygame.RLEACCEL)
         start_x = SCREEN_WIDTH + 100
         start_y = random.randint(0, SCREEN_HEIGHT)
