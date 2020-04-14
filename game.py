@@ -38,7 +38,7 @@ def display_game_results(message, results_sound, timeout):
     pygame.mixer.music.stop()
     text = py_text.Text(message, 42)
     text.center()
-    screen_buffer.fill(graphics.SKY_BLUE)
+    #screen_buffer.fill(graphics.SKY_BLUE)
     results_sound.play()
     screen_buffer.blit(text.surf, text.rect)
     pygame.display.update()
@@ -65,8 +65,7 @@ def game_loop():
     pygame.mixer.music.play(loops=-1) 
     
     running = True
-    unicorn_dead = False
-    dead_unicorn_count = 0
+    unicorn_is_dead = False
     while running:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
@@ -105,11 +104,14 @@ def game_loop():
         
         # DRAW TO BUFFER AND THEN TO SCREEN
         screen_buffer.fill(graphics.SKY_BLUE)
-        if unicorn_dead:
+        if unicorn_is_dead:
             dead_unicorn.update()
             dead_unicorn.draw(screen_buffer)
-            dead_unicorn_count += 1
-            if dead_unicorn_count == dead_unicorn.sprite_count:
+            if dead_unicorn.walk_count >= len(dead_unicorn.surfs) -1:
+                screen_buffer.fill(graphics.SKY_BLUE)
+                screen_buffer.blit(dead_unicorn.surfs[-1], dead_unicorn.rect)
+                display_game_results("YOU LOSE", sfx.game_over_voice, 3)
+                dead_unicorn.kill()
                 running = False
         else:
             screen_buffer.blit(cake_counter.surf, cake_counter.rect)
@@ -145,7 +147,7 @@ def game_loop():
                 enemy.kill()
                 #display_game_results("You Lose!! :(", sfx.game_over_voice, 4)
                 #running = False
-                unicorn_dead = True
+                unicorn_is_dead = True
                 dead_unicorn = sprites.DeadUnicorn(unicorn)
         clock.tick(graphics.FRAME_RATE)
 

@@ -108,6 +108,8 @@ class AnimatedSprite(pygame.sprite.Sprite):
     
     def draw(self, screen_buffer):
         surf = self.surfs[self.walk_count]
+        if self.sprite_id == DEAD_UNICORN:
+            print(self.walk_count)
         x = self.rect.x
         y = self.rect.y
         self.rect = surf.get_rect()
@@ -136,7 +138,7 @@ class DeadUnicorn(AnimatedSprite):
                  (439, y, width, height), (552, y, width, height),
                  (656, y, width, height), (771, y, width, height),
                  (885, y, width, height))
-        super(DeadUnicorn, self).__init__(path, 4, rects, DEAD_UNICORN)
+        super(DeadUnicorn, self).__init__(path, 1, rects, DEAD_UNICORN)
         self.rect = self.surfs[0].get_rect(
             x = unicorn.rect.x,
             y = unicorn.rect.y
