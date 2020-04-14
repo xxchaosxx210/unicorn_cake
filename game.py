@@ -101,7 +101,7 @@ def game_loop():
         screen_buffer.fill(graphics.SKY_BLUE)
         screen_buffer.blit(cake_counter.surf, cake_counter.rect)
         for entity in entities["all"]:
-            screen_buffer.blit(entity.surf, entity.rect)
+            entity.draw(screen_buffer)
         # update the score
         pygame.display.update()
         

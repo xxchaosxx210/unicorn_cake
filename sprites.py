@@ -34,7 +34,7 @@ class CakeScore(py_text.Text):
     def reset_score(self):
         self.score = 0
         self.set_text(f"Cakes: {self.score}")
-        self.set_xy() 
+        self.set_xy()
         
 
 class Cloud(pygame.sprite.Sprite):
@@ -53,6 +53,9 @@ class Cloud(pygame.sprite.Sprite):
         self.rect.move_ip(-self.speed, 0)
         if self.rect.right < 0:
             self.kill()
+    
+    def draw(self, screenbuffer):
+        screenbuffer.blit(self.surf, self.rect)
             
             
 class RainbowStar(pygame.sprite.Sprite):
@@ -79,6 +82,9 @@ class RainbowStar(pygame.sprite.Sprite):
                 _enemy.kill()
         if self.rect.left > SCREEN_WIDTH:
             self.kill()
+    
+    def draw(self, screenbuffer):
+        screenbuffer.blit(self.surf, self.rect)    
             
             
 class Unicorn(pygame.sprite.Sprite):   
@@ -87,16 +93,25 @@ class Unicorn(pygame.sprite.Sprite):
         super(Unicorn, self).__init__()
         #self.surf = pygame.image.load(os.path.join(IMAGE_PATH, "unicorn.png")).convert()
         self.unicorn_sheet = SpriteSheet(".\\images\\unicorn_sheet.png")
-        self.surf = self.unicorn_sheet.image_at((17, 750, 120, 130))
-        #self.surfs = self.unicorn_sheet.images_at()
+        self.rects = namedtuple("Rects", ["one", "two", 
+                                                "three", "four", 
+                                                "five", "six",
+                                                "seven"])(
+            (35, 157, 120, 105), (224, 157, 120, 105),
+            (410, 157, 120, 105), (576, 157, 120, 105),
+            (767, 157, 120, 105), (956, 157, 120, 105),
+            (1112, 157, 120, 105))
+        self.surfs = self.unicorn_sheet.images_at(self.rects)
+        self.walk_count = 0
         
         #self.surf.set_colorkey(graphics.TRANSPARENT, pygame.RLEACCEL)
-        self.rect = self.surf.get_rect(
+        self.rect = self.surfs[0].get_rect(
             top = 0,
             left = 0
         )
         self.speed = 10
         self.cakes = 0
+        self.frame_count = 0
     
     def update(self, pressed_keys):
         if pressed_keys[pygame.K_UP]:
@@ -116,8 +131,18 @@ class Unicorn(pygame.sprite.Sprite):
         if self.rect.right > SCREEN_WIDTH:
             self.rect.right = SCREEN_WIDTH
     
-    def draw(self):
-        pass
+    def draw(self, screen_buffer):
+        surf = self.surfs[self.walk_count]
+        x = self.rect.x
+        y = self.rect.y
+        self.rect = surf.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        screen_buffer.blit(surf, self.rect)
+        if self.walk_count > len(self.rect)-1:
+            self.walk_count = 0
+        else:
+            self.walk_count += 1
             
             
 class Enemy(pygame.sprite.Sprite):
@@ -157,6 +182,9 @@ class Enemy(pygame.sprite.Sprite):
             self.rect.move_ip(-self.speed, -self.speed)
         if self.rect.right < 0:
             self.kill()
+    
+    def draw(self, screenbuffer):
+        screenbuffer.blit(self.surf, self.rect)    
             
             
 class RainbowPowerup(pygame.sprite.Sprite):
@@ -174,6 +202,9 @@ class RainbowPowerup(pygame.sprite.Sprite):
         self.rect.move_ip(-self.speed, 0)
         if self.rect.right < 0:
             self.kill()
+    
+    def draw(self, screenbuffer):
+        screenbuffer.blit(self.surf, self.rect)    
             
             
 class UnicornCake(pygame.sprite.Sprite):
@@ -202,3 +233,6 @@ class UnicornCake(pygame.sprite.Sprite):
             self.rect.move_ip(-self.speed, -self.speed)
         if self.rect.right < 0:
             self.kill() 
+        
+    def draw(self, screenbuffer):
+        screenbuffer.blit(self.surf, self.rect)    
