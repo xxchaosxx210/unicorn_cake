@@ -75,8 +75,10 @@ def game_loop():
                     running = False
             if event.type == ADD_ENEMY:
                 # SPAWN A NEW ENEMY
-                #enemy = sprites.Enemy()
-                enemy = sprites.Dog()
+                if random.randint(0, 1) == sprites.DOG:
+                    enemy = sprites.Dog()
+                else:
+                    enemy = sprites.Cat()
                 entities["enemies"].add(enemy)
                 entities["all"].add(enemy)
             if event.type == ADD_CLOUD:
