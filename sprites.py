@@ -13,6 +13,7 @@ from spritesheet import load_rects
 CAT = 0
 DOG = 1
 UNICORN = 2
+DEAD_UNICORN = 3
 
 IMAGE_PATH = f".{os.path.sep}images" 
 
@@ -103,6 +104,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.frame_change = frame_change
         self.frame_count = 0
         self.sprite_id = sprite_id
+        self.sprite_count = len(self.surfs)
     
     def draw(self, screen_buffer):
         surf = self.surfs[self.walk_count]
@@ -128,18 +130,18 @@ class DeadUnicorn(AnimatedSprite):
         path = ".\\images\\unicorn_sheet.png"
         width = 100
         height = 100
-        y = 413
+        y = 410
         rects = ((14, y, width, height), (117, y, width, height),
                  (219, y, width, height), (335, y, width, height),
                  (439, y, width, height), (552, y, width, height),
                  (656, y, width, height), (771, y, width, height),
                  (885, y, width, height))
-        super(DeadUnicorn, self).__init__(path, 4, rects)
+        super(DeadUnicorn, self).__init__(path, 4, rects, DEAD_UNICORN)
         self.rect = self.surfs[0].get_rect(
-            x = unicorn.x,
-            y = unicorn.y
+            x = unicorn.rect.x,
+            y = unicorn.rect.y
         )
-        self.speed = unicorn.speed
+        self.speed = 1
     
     def update(self):
         self.rect.move_ip(self.speed, 0)
