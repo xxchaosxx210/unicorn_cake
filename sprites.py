@@ -91,20 +91,14 @@ class Unicorn(pygame.sprite.Sprite):
     
     def __init__(self):
         super(Unicorn, self).__init__()
-        #self.surf = pygame.image.load(os.path.join(IMAGE_PATH, "unicorn.png")).convert()
         self.unicorn_sheet = SpriteSheet(".\\images\\unicorn_sheet.png")
-        self.rects = namedtuple("Rects", ["one", "two", 
-                                                "three", "four", 
-                                                "five", "six",
-                                                "seven"])(
-            (35, 157, 120, 105), (224, 157, 120, 105),
+        rects = ((35, 157, 120, 105), (224, 157, 120, 105),
             (410, 157, 120, 105), (576, 157, 120, 105),
             (767, 157, 120, 105), (956, 157, 120, 105),
             (1112, 157, 120, 105))
-        self.surfs = self.unicorn_sheet.images_at(self.rects, graphics.TRANSPARENT)
+        self.surfs = self.unicorn_sheet.images_at(rects, graphics.TRANSPARENT)
         self.walk_count = 0
         
-        #self.surf.set_colorkey(graphics.TRANSPARENT, pygame.RLEACCEL)
         self.rect = self.surfs[0].get_rect(
             top = 0,
             left = 0
@@ -139,10 +133,14 @@ class Unicorn(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
         screen_buffer.blit(surf, self.rect)
-        if self.walk_count > len(self.rect)-1:
-            self.walk_count = 0
+        if self.frame_count > 4:
+            if self.walk_count > len(self.rect)-1:
+                self.walk_count = 0
+            else:
+                self.walk_count += 1
+            self.frame_count = 0
         else:
-            self.walk_count += 1
+            self.frame_count += 1
             
             
 class Enemy(pygame.sprite.Sprite):
