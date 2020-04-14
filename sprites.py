@@ -1,11 +1,13 @@
 import pygame
 import os
 import random
+from collections import namedtuple
 
 import graphics
 import py_text
 from graphics import SCREEN_WIDTH, SCREEN_HEIGHT
 import sfx
+from spritesheet import SpriteSheet
 
 CAT = 0
 DOG = 1
@@ -83,8 +85,12 @@ class Unicorn(pygame.sprite.Sprite):
     
     def __init__(self):
         super(Unicorn, self).__init__()
-        self.surf = pygame.image.load(os.path.join(IMAGE_PATH, "unicorn.png")).convert()
-        self.surf.set_colorkey(graphics.TRANSPARENT, pygame.RLEACCEL)
+        #self.surf = pygame.image.load(os.path.join(IMAGE_PATH, "unicorn.png")).convert()
+        self.unicorn_sheet = SpriteSheet(".\\images\\unicorn_sheet.png")
+        self.surf = self.unicorn_sheet.image_at((17, 750, 120, 130))
+        #self.surfs = self.unicorn_sheet.images_at()
+        
+        #self.surf.set_colorkey(graphics.TRANSPARENT, pygame.RLEACCEL)
         self.rect = self.surf.get_rect(
             top = 0,
             left = 0
@@ -109,6 +115,9 @@ class Unicorn(pygame.sprite.Sprite):
             self.rect.left = 0
         if self.rect.right > SCREEN_WIDTH:
             self.rect.right = SCREEN_WIDTH
+    
+    def draw(self):
+        pass
             
             
 class Enemy(pygame.sprite.Sprite):

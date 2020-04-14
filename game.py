@@ -71,6 +71,8 @@ def game_loop():
                     rainbow_star = sprites.RainbowStar(unicorn)
                     entities["all"].add(rainbow_star)
                     entities["stars"].add(rainbow_star)
+                if event.key == pygame.K_2:
+                    running = False
             if event.type == ADD_ENEMY:
                 # SPAWN A NEW ENEMY
                 enemy = sprites.Enemy()
