@@ -101,7 +101,7 @@ class Unicorn(pygame.sprite.Sprite):
             (410, 157, 120, 105), (576, 157, 120, 105),
             (767, 157, 120, 105), (956, 157, 120, 105),
             (1112, 157, 120, 105))
-        self.surfs = self.unicorn_sheet.images_at(self.rects)
+        self.surfs = self.unicorn_sheet.images_at(self.rects, graphics.TRANSPARENT)
         self.walk_count = 0
         
         #self.surf.set_colorkey(graphics.TRANSPARENT, pygame.RLEACCEL)
