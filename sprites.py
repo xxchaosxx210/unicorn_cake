@@ -120,7 +120,29 @@ class AnimatedSprite(pygame.sprite.Sprite):
             self.frame_count = 0
         else:
             self.frame_count += 1
-            
+
+
+class DeadUnicorn(AnimatedSprite):
+    
+    def __init__(self, unicorn):
+        path = ".\\images\\unicorn_sheet.png"
+        width = 100
+        height = 100
+        y = 413
+        rects = ((14, y, width, height), (117, y, width, height),
+                 (219, y, width, height), (335, y, width, height),
+                 (439, y, width, height), (552, y, width, height),
+                 (656, y, width, height), (771, y, width, height),
+                 (885, y, width, height))
+        super(DeadUnicorn, self).__init__(path, 4, rects)
+        self.rect = self.surfs[0].get_rect(
+            x = unicorn.x,
+            y = unicorn.y
+        )
+        self.speed = unicorn.speed
+    
+    def update(self):
+        self.rect.move_ip(self.speed, 0)
             
 class Unicorn(AnimatedSprite):   
     
@@ -130,7 +152,7 @@ class Unicorn(AnimatedSprite):
         height = 100
         y = 20
         rects = ((378, y, width, height),(484, y, width, height),
-                 (581, y, width, height), (678, y, width, height),
+                 (581, y, width, height), (676, y, width, height),
                  (773, y, width, height), (874, y, width, height))
         super(Unicorn, self).__init__(path, 2, rects, UNICORN)
         self.rect = self.surfs[0].get_rect(

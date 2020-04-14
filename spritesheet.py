@@ -2,6 +2,9 @@ import pygame
 
 
 def load_rects(sprite_count, x, y, width, height):
+    """
+    load sprite rectangles using x offset
+    """
     rects = []
     for sprite_index in range(sprite_count):
         rects.append((x, y, width, height))
