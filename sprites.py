@@ -116,7 +116,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
         screen_buffer.blit(surf, self.rect)
-        if self.frame_count > self.frame_change:
+        if self.frame_count == self.frame_change:
             if self.walk_count == len(self.surfs)-1:
                 self.walk_count = 0
             else:

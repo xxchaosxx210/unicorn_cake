@@ -107,7 +107,7 @@ def game_loop():
         if unicorn_is_dead:
             dead_unicorn.update()
             dead_unicorn.draw(screen_buffer)
-            if dead_unicorn.walk_count >= len(dead_unicorn.surfs) -1:
+            if dead_unicorn.walk_count == len(dead_unicorn.surfs) -1:
                 screen_buffer.fill(graphics.SKY_BLUE)
                 screen_buffer.blit(dead_unicorn.surfs[-1], dead_unicorn.rect)
                 display_game_results("YOU LOSE", sfx.game_over_voice, 3)
@@ -120,35 +120,36 @@ def game_loop():
         # update the score
         pygame.display.update()           
         
-        # CHECK FOR COLLISIONS
-        for _cake in entities["cakes"]:
-            if pygame.sprite.collide_rect(unicorn, _cake):
-                # play cake collection sound
-                sfx.gulp.play()
-                _cake.kill()
-                cake_counter.inc_score()
-                if cake_counter.score == MAX_CAKES:
-                    # we won the challlenge!!
-                    display_game_results("Congratulations!! You won the Unicorn Cake Challlenge!!!",
-                                         sfx.game_over_voice, 4)
-                    running = False
-                elif cake_counter.score == 2:
-                    rainbow_powerup = sprites.RainbowPowerup()
-                    entities["rainbow_powerups"].add(rainbow_powerup)
-                    entities["all"].add(rainbow_powerup)
-        for powerup in entities["rainbow_powerups"]:
-            if pygame.sprite.collide_rect(unicorn, powerup):
-                sfx.powerup.play()
-                powerup.kill()
-                unicorn.speed += 20
-        for enemy in entities["enemies"]:
-            if pygame.sprite.collide_rect(unicorn, enemy):
-                unicorn.kill()
-                enemy.kill()
-                #display_game_results("You Lose!! :(", sfx.game_over_voice, 4)
-                #running = False
-                unicorn_is_dead = True
-                dead_unicorn = sprites.DeadUnicorn(unicorn)
+        if not unicorn_is_dead:
+            # CHECK FOR COLLISIONS
+            for _cake in entities["cakes"]:
+                if pygame.sprite.collide_rect(unicorn, _cake):
+                    # play cake collection sound
+                    sfx.gulp.play()
+                    _cake.kill()
+                    cake_counter.inc_score()
+                    if cake_counter.score == MAX_CAKES:
+                        # we won the challlenge!!
+                        display_game_results("Congratulations!! You won the Unicorn Cake Challlenge!!!",
+                                             sfx.level_complete, 4)
+                        running = False
+                    elif cake_counter.score == 2:
+                        rainbow_powerup = sprites.RainbowPowerup()
+                        entities["rainbow_powerups"].add(rainbow_powerup)
+                        entities["all"].add(rainbow_powerup)
+            for powerup in entities["rainbow_powerups"]:
+                if pygame.sprite.collide_rect(unicorn, powerup):
+                    sfx.powerup.play()
+                    powerup.kill()
+                    unicorn.speed += 20
+            for enemy in entities["enemies"]:
+                if pygame.sprite.collide_rect(unicorn, enemy):
+                    unicorn.kill()
+                    enemy.kill()
+                    #display_game_results("You Lose!! :(", sfx.game_over_voice, 4)
+                    #running = False
+                    unicorn_is_dead = True
+                    dead_unicorn = sprites.DeadUnicorn(unicorn)
         clock.tick(graphics.FRAME_RATE)
 
     # CLEAN UP
