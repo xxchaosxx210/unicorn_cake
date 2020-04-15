@@ -125,6 +125,7 @@ def game_loop():
                 screen_buffer.blit(dead_unicorn.surfs[-1], dead_unicorn.rect)
                 display_game_results("YOU LOSE", sfx.game_over_voice, 3)
                 dead_unicorn.kill()
+                del dead_unicorn
                 running = False
         else:
             screen_buffer.blit(cake_counter.surf, cake_counter.rect)
@@ -176,7 +177,6 @@ def game_loop():
     del entities["cakes"]
     del cake_counter
     del unicorn
-    del dead_unicorn
     pygame.mixer.music.stop()
 
 
