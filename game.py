@@ -1,3 +1,7 @@
+# Unicorn Cake Game
+
+# A simple Shoot-em up for Children
+
 import pygame
 import random
 import time
@@ -35,6 +39,9 @@ ADD_CAKE = pygame.USEREVENT + 3
 pygame.time.set_timer(ADD_CAKE, 5000) 
 
 def display_game_results(message, results_sound, timeout):
+    """
+    shows text and plays the game over sound
+    """
     pygame.mixer.music.stop()
     text = py_text.Text(message, 42)
     text.center()
@@ -45,7 +52,10 @@ def display_game_results(message, results_sound, timeout):
     time.sleep(timeout)
     
         
-def game_loop():    
+def game_loop():
+    """
+    main game loop
+    """
     # create a new unicorn player object
     unicorn = sprites.Unicorn()
     
@@ -65,8 +75,10 @@ def game_loop():
     pygame.mixer.music.play(loops=-1) 
     
     running = True
+    # bool check to see if unicorn is still alive
     unicorn_is_dead = False
     while running:
+        # get the game events
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
@@ -107,6 +119,7 @@ def game_loop():
         if unicorn_is_dead:
             dead_unicorn.update()
             dead_unicorn.draw(screen_buffer)
+            # if last sprite loaded then kill then break the animation loop and exit
             if dead_unicorn.walk_count == len(dead_unicorn.surfs) -1:
                 screen_buffer.fill(graphics.SKY_BLUE)
                 screen_buffer.blit(dead_unicorn.surfs[-1], dead_unicorn.rect)
@@ -117,9 +130,10 @@ def game_loop():
             screen_buffer.blit(cake_counter.surf, cake_counter.rect)
             for entity in entities["all"]:
                 entity.draw(screen_buffer)         
-        # update the score
+        # update the screen
         pygame.display.update()           
         
+        # if player still alive then check for collisions
         if not unicorn_is_dead:
             # CHECK FOR COLLISIONS
             for _cake in entities["cakes"]:
@@ -162,6 +176,7 @@ def game_loop():
     del entities["cakes"]
     del cake_counter
     del unicorn
+    del dead_unicorn
     pygame.mixer.music.stop()
 
 
